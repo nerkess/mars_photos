@@ -45,10 +45,10 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   late Future<List<MarsPhoto>> futureMarsPhotos;
-  late String? selectedDate = DateFormat("yyyy-M-d").format(DateTime.now().subtract(const Duration(days:1)));
 
   Future<List<MarsPhoto>> fetchMarsPhotos() async {
-    final response = await http.get(Uri.parse('https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/photos?earth_date=$selectedDate&api_key=ooRR4jQXE0asSoeD93k2N5kp2Q6sOoYDJSNcohUh'));
+    final String yesterday = DateFormat("yyyy-M-d").format(DateTime.now().subtract(const Duration(days: 1)));
+    final response = await http.get(Uri.parse('https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/photos?earth_date=2022-5-22&api_key=ooRR4jQXE0asSoeD93k2N5kp2Q6sOoYDJSNcohUh'));
     if (response.statusCode == 200) {
       final items = json.decode(response.body).cast<String, dynamic>();
       List<MarsPhoto> listOfString =
@@ -57,16 +57,6 @@ class _MyHomePageState extends State<MyHomePage> {
       return listOfString;
     } else {
       throw Exception('Failed to load Mars photos');
-    }
-  }
-
-  Future<void> _showDatePicker()async{
-    final DateTime? picked = await showDatePicker(context: context, initialDate: DateTime.now(),
-        firstDate: DateTime(2015, 8), lastDate: DateTime(2101));
-    if(picked != null)
-    {
-      selectedDate = DateFormat("yyyy-M-d").format(picked);
-      print(selectedDate);
     }
   }
 
@@ -88,27 +78,7 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Center(
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-
-            Text(" ${selectedDate??"Selected Time"}",
-              style: TextStyle(fontSize: 17,fontWeight: FontWeight.w800),),
-            ElevatedButton(child: Text("Show Time Picker"),
-              onPressed: () async {
-                DateTime? picked = await showDatePicker(
-                    context: context,
-                    initialDate: DateTime.now(),
-                    firstDate: DateTime(2015, 8),
-                    lastDate: DateTime(2101));
-                if(picked == null) return;
-                setState(() => selectedDate = DateFormat("yyyy-M-d").format(picked));
-              } ),
-            Divider(),
-            SizedBox(height: 50,),
-
-            /*FutureBuilder<List<MarsPhoto>>(
+        child: FutureBuilder<List<MarsPhoto>>(
                 future: fetchMarsPhotos(),
                 builder: (context, snapshot) {
                   if(snapshot.hasData) {
@@ -126,15 +96,8 @@ class _MyHomePageState extends State<MyHomePage> {
                   }
                   return const CircularProgressIndicator();
                 }
-            )*/
-          ],
-        ),
+            )
       ),
-      /*floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), */// This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
